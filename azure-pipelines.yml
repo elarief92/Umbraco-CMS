@@ -1,8 +1,9 @@
 
 
 pool:
-  vmImage: 'windows-latest'  # Confirmed to include .NET Framework 4.7.2
-
+ # vmImage: 'windows-latest'  # Confirmed to include .NET Framework 4.7.2
+  vmImage: 'windows-2019'
+  
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
