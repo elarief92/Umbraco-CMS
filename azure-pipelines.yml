@@ -1,29 +1,38 @@
+
+
+pool:
+  vmImage: 'windows-latest'  # Confirmed to include .NET Framework 4.7.2
+
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  # Add explicit .NET Framework version variable
-  targetFramework: 'net472'  # .NET Framework 4.7.2 identifier
+  targetFramework: 'net472'  # .NET Framework 4.7.2
 
 steps:
+# Ensure correct .NET Framework targeting pack is available
 - task: NuGetToolInstaller@1
 
+# Restore NuGet packages
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
+    feedsToUse: 'select'
 
+# Explicitly target .NET Framework 4.7.2 in build
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
-    # Add explicit framework targeting
     msbuildArgs: '/p:TargetFramework=$(targetFramework) /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+    vsVersion: '17.0'  # Explicitly use VS 2022
 
+# Run tests targeting .NET Framework 4.7.2
 - task: VSTest@2
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-    # Add framework targeting for tests
-    testRunTitle: 'Test $(targetFramework)'
+    testRunTitle: 'NET472 Tests'
     arguments: '--framework $(targetFramework)'
+    vsTestVersion: '17.0'
