@@ -4,6 +4,7 @@
     <Title>Umbraco CMS - Published cache - HybridCache</Title>
     <Description>Contains the published cache assembly needed to run Umbraco CMS.</Description>
     <RootNamespace>Umbraco.Cms.Infrastructure.HybridCache</RootNamespace>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
   
   <PropertyGroup>

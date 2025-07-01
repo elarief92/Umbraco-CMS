@@ -2,6 +2,7 @@
   <PropertyGroup>
     <Title>Umbraco CMS - Persistence - Entity Framework Core - SQL Server migrations</Title>
     <Description>Adds support for Entity Framework Core SQL Server migrations to Umbraco CMS.</Description>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
