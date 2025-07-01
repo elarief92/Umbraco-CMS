@@ -1,39 +1,56 @@
 
 
 pool:
- # vmImage: 'windows-latest'  # Confirmed to include .NET Framework 4.7.2
   vmImage: 'windows-2019'
-  
+
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  targetFramework: 'net472'  # .NET Framework 4.7.2
 
 steps:
-# Ensure correct .NET Framework targeting pack is available
 - task: NuGetToolInstaller@1
 
-# Restore NuGet packages
+# Restore packages
 - task: NuGetCommand@2
   inputs:
+    command: 'restore'
     restoreSolution: '$(solution)'
     feedsToUse: 'select'
+    noCache: true
 
-# Explicitly target .NET Framework 4.7.2 in build
+# Add package dependency checks here
+- task: DotNetCoreCLI@2
+  displayName: 'Check Package Dependencies'
+  inputs:
+    command: custom
+    custom: list
+    arguments: 'package --deprecated --vulnerable'
+    projects: '$(solution)'
+    workingDirectory: '$(Build.SourcesDirectory)'
+  continueOnError: true  # Don't fail immediately - just report issues
+
+# Rest of your pipeline continues here...
+- task: MSBuild@1
+  displayName: 'Generate Binding Redirects'
+  inputs:
+    solution: '$(solution)'
+    msbuildArguments: '/t:GenerateBindingRedirects /p:GenerateBindingRedirectsOutputType=true'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
-    msbuildArgs: '/p:TargetFramework=$(targetFramework) /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+    msbuildArgs: '/p:TargetFramework=net472 /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)" /p:AutoGenerateBindingRedirects=true'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-    vsVersion: '17.0'  # Explicitly use VS 2022
+    clean: true
+    vsVersion: '16.0'
 
-# Run tests targeting .NET Framework 4.7.2
 - task: VSTest@2
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     testRunTitle: 'NET472 Tests'
-    arguments: '--framework $(targetFramework)'
-    vsTestVersion: '17.0'
+    vsTestVersion: '16.0'
